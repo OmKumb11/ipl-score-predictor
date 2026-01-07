@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd 
 from sklearn.linear_model import LinearRegression 
 import numpy as np 
+import matplotlib.pyplot as plt
 
 st.title("AI IPL Score Predictor")
 st.write("This App Uses Machine Learning to Predict Final Score.")
@@ -53,3 +54,21 @@ if st.button("Predict Final Score"):
         st.write("That's a Massive Total!")
     elif final_score < 140:
         st.write("Needs some Acceleration")
+    
+    st.divider()
+    st.subheader("Match Scenario Anaylsis")
+    st.write("See how your prediction (Red) compares to past matches (Blue).")
+
+    fig, ax = plt.subplots()
+
+    ax.scatter(df['powerplay_runs'], df['final_score'], color = 'blue', label = 'Historical Matches', alpha = 0.6)
+
+    ax.scatter(pp_runs, final_score, color = 'red', s = 200, label ='Current Prediction', marker = '*')
+
+    ax.set_xlabel('Powerplay Runs')
+    ax.set_ylabel('Final Score')
+    ax.set_title('Powerplay Runs vs. Final Score')
+    ax.legend()
+    ax.grid(True)
+
+    st.pyplot(fig)
