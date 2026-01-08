@@ -1,9 +1,11 @@
 import streamlit as st 
 import pandas as pd 
 from sklearn.linear_model import LinearRegression 
+from sklearn.metrics import mean_squared_error
 import numpy as np 
 import matplotlib.pyplot as plt
 
+st.set_page_config(page_title= "IPL Predictor", page_icon="🏏")
 st.title("AI IPL Score Predictor")
 st.write("This App Uses Machine Learning to Predict Final Score.")
 
@@ -17,6 +19,8 @@ try:
     model = LinearRegression()
     model.fit(X,y)
 
+    accuracy = model.score(X,y)
+
     st.success("Model Successfully Trained on Data!")
 
 except FileNotFoundError:
@@ -26,15 +30,15 @@ except KeyError:
     st.error("⚠️ Error: CSV columns don't match. Make sure your CSV has 'powerplay_runs', 'wickets', and 'final_score'.")
     st.stop()
 
-col1 , col2 = st.columns(2)
+st.sidebar.header("Match Scenario")
+st.sidebar.write("Enter the Current Match Stats: ")
 
-with col1:
-    
-    pp_runs = st.number_input("Powerplay Runs: ", min_value=0, max_value=100, step=1, value=45)
 
-with col2: 
-    
-    wickets_lost = st.number_input("Wickets Lost: ", min_value=0, max_value=10, step=1, value=1)
+pp_runs = st.number_input("Powerplay Runs: ", min_value=0, max_value=100, step=1, value=45)
+wickets_lost = st.number_input("Wickets Lost: ", min_value=0, max_value=10, step=1, value=1)
+
+st.sidebar.markdown("---")
+st.sidebar.caption(f"Model Accurary: {accuracy*100:.1f}%")
 
 if st.button("Predict Final Score"):
     
@@ -47,7 +51,8 @@ if st.button("Predict Final Score"):
     if wickets_lost == 10:
         final_score = pp_runs
 
-    st.header(f"Predicted Final Score: {final_score}")
+    st.markdown(f"<h1 style='text-align: center; color: red;'>{final_score}</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>Predicted Final Score</h3>", unsafe_allow_html=True)
 
     if final_score > 200:
         st.balloons()
@@ -56,10 +61,7 @@ if st.button("Predict Final Score"):
         st.write("Needs some Acceleration")
     
     st.divider()
-    st.subheader("Match Scenario Anaylsis")
-    st.write("See how your prediction (Red) compares to past matches (Blue).")
-
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8,4))
 
     ax.scatter(df['powerplay_runs'], df['final_score'], color = 'blue', label = 'Historical Matches', alpha = 0.6)
 
@@ -69,6 +71,6 @@ if st.button("Predict Final Score"):
     ax.set_ylabel('Final Score')
     ax.set_title('Powerplay Runs vs. Final Score')
     ax.legend()
-    ax.grid(True)
+    ax.grid(True, linestyle = '--', alpha = 0.5)
 
     st.pyplot(fig)
